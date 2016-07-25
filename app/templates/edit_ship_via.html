@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Edit Ship via: {{ form.name.data }} {% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h1>Edit Ship Via: {{ form.name.data }}</h1>
+</div>
+<div class="col-md-4">
+  {{ wtf.quick_form(form) }}
+</div>
+
+{% endblock %}

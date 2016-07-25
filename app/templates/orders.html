@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Material Tracker - Open Orders{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="container">
+      <div class="btn-group-lg">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#filterModal"><span class="glyphicon glyphicon-filter"></span> Filter</button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal"><span class="glyphicon glyphicon-edit"></span> Edit</button>
+      </div>
+      <div id="filterModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Filter Orders</h4>
+            </div>
+            <div class="modal-body">
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_status" {% if session['chk_status'] %} checked {% endif %}>Status</label>
+              </div>
+              <select class="form-control input-sm" id="orders_status" name="orders_status">
+                <option {% if session['chk_status'] is none or session['chk_status'] == False or session['status'] == 8 %} selected {% endif %} value="9">ALL</option>
+                <option {% if session['status']==0 %} selected {% endif %} value="0">Ordered</option>
+                <option {% if session['status']==1 %} selected {% endif %}value="1">Confirmed</option>
+                <option {% if session['status']==2 %} selected {% endif %}value="2">Shipped</option>
+                <option {% if session['status']==3 %} selected {% endif %}value="3">Delivered</option>
+                <option {% if session['status']==4 %} selected {% endif %}value="4">Importation</option>
+                <option {% if session['status']==5 %} selected {% endif %}value="5">Complete</option>
+                <option {% if session['status']==8 %} selected {% endif %}value="8">Not Delivered</option>
+              </select>
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_vendor" {% if session['chk_vendor'] %} checked {% endif %}>Vendor</label>
+              </div>
+                <select class="form-control input-sm" id="sel_vendor" name="sel_vendor">
+                  <option {% if session['sel_vendor'] == 1000 %} selected {% endif %} value="1000">ALL</option>
+                  {% for vendor in vendors %}
+                    <option {% if session['sel_vendor'] == vendor.id %} selected {% endif %} value="{{ vendor.id }}">{{ vendor.name }}</option>
+                  {% endfor %}
+                </select>
+                <div class="checkbox">
+                  <label><input type="checkbox" value="" id="chk_inv_type" {% if session['chk_inv_type'] %} checked {% endif %}>Inv. Type</label>
+                </div>
+                  <select class="form-control input-sm" id="sel_inv_type" name="sel_inv_type">
+                    <option {% if session['sel_inv_type'] == 1 %} selected {% endif %} value="1">Inventory items</option>
+                    <option {% if session['sel_inv_type'] == 2 %} selected {% endif %} value="2">Non-Inventory items</option>
+                  </select>
+                <div class="checkbox">
+                  <label><input type="checkbox" value="" id="chk_pn" {% if session['chk_pn'] %} checked {% endif %}>P/N</label>
+                </div>
+                <input type="text" class="form-control input-sm" id="txt_pn" name="txt_pn" {% if session['txt_pn'] is not none %} value="{{ session['txt_pn']|trim|upper }}" {% endif %}>
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_po" {% if session['chk_po'] %} checked {% endif %}>PO#</label>
+              </div>
+              <input type="text" class="form-control input-sm" id="txt_po" name="txt_po" {% if session['txt_po'] is not none %} value="{{ session['txt_po']|trim|upper }}" {% endif %}>
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_expected_del_date" {% if session['chk_expected_del_date'] %} checked {% endif %}>Delivery Date</label>
+                </div>
+                <input type="text" class="form-control input-sm" id="txt_expected_del_date" name="txt_expected_del_date" placeholder="mm/dd/yy" {% if session['txt_expected_del_date'] is not none %} value="{{ session['txt_expected_del_date'] }}" {% endif %}>
+                <br><button class="btn btn-primary" id="btn_select_status">View</button>
+              </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="editModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Edit orders</h4>
+            </div>
+            <div class="modal-body">
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_edit_expected_del_date">Delivery Date</label>
+              </div>
+              <input type="text" class="form-control" id="txt_edit_expected_del_date" name="txt_edit_expected_del_date" placeholder="mm/dd/yy">
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_edit_ship_via">Ship via</label>
+              </div>
+              <select class="form-control" id="sel_edit_ship_via" name="sel_edit_ship_via">
+                {% for ship_via in ship_vias %}
+                  <option value="{{ ship_via.id }}">{{ ship_via.name }}</option>
+                {% endfor %}
+              </select>
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_edit_tracking_number">Tracking#</label>
+              </div>
+              <input type="text" class="form-control" id="txt_edit_tracking_number" name="txt_edit_tracking_number">
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_edit_status">Status</label>
+              </div>
+              <select class="form-control" id="sel_edit_status" name="sel_edit_status">
+                <option value="0">Ordered</option>
+                <option value="1">Confirmed</option>
+                <option value="2" selected>Shipped</option>
+                <option value="3">Delivered</option>
+                <option value="4">Importation</option>
+                <option value="5">Complete</option>
+                {% if current_user.is_administrator() %} <option value="99">CANCELLED</option> {% endif %}
+              </select>
+              <div class="checkbox">
+                <label><input type="checkbox" value="" id="chk_edit_priority">Priority</label>
+              </div>
+              <select class="form-control" id="sel_edit_priority" name="sel_edit_priority">
+                <option selected value="0">Normal</option>
+                <option value="1">High</option>
+              </select>
+              <br>
+              <button class="btn btn-success" id="btn_edit_save">Save</button>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="itemModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title" id="item_modal_title">View order</h4>
+            </div>
+            <div class="modal-body" id="div_item_body">
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+</div><br>
+<div id="div_orders">
+  {% include '_view_orders.html' %}
+</div>
+
+{% endblock %}
+{%block scripts %}
+{{ super() }}
+<script>
+
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+
+  $(document).on("change","#chk_master",function(){
+    if($(this).is(':checked')){
+      $('.chk_item').each(function(){
+        $(this).attr('checked',true);
+      });
+    }
+    else{
+      $('.chk_item').each(function(){
+        $(this).attr('checked',false);
+      });
+    }
+  });
+
+  $(document).on("click",".btn-view-order",function(){
+    var order_id = $(this).data('order');
+    console.log(order_id);
+    $("#item_modal_title").text($(this).text());
+    $.post('/order_details/'+order_id, function(data, status){
+      console.log(status);
+      $('#div_item_body').html(data);
+    });
+  });
+
+  $(document).on("click","#btn-post",function(){
+    var order_id=$(this).data('order');
+    var comment = $('#txt-comment').val()
+    if (comment!=""){
+      $.post('/post_comment/'+order_id,{comment:comment},function(data,status){
+        $("#itemModal").modal("hide");
+      });
+    }
+  });
+
+  $(document).on("click",".btn-follow",function(){
+    if($(this).hasClass('follow')){
+      var order_id = $(this).data('order');
+      $(this).css("color","#cc0000");
+      $(this).children('span').attr("title", "Unfollow this item.");
+      $.post("/subscribe/"+order_id, function(data, status){
+      });
+    }
+    else{
+      var order_id = $(this).data('order');
+      $(this).css("color","#39ac39");
+      $(this).children('span').attr("title", "Follow this item.");
+      $.post("/unsubscribe/"+order_id, function(data, status){
+      });
+    }
+    $(this).toggleClass('follow');
+  });
+
+  $('#btn_select_status').click(function(){
+    $("#filterModal").modal("hide");
+    var chk_status = $('#chk_status').is(":checked");
+    var chk_vendor = $('#chk_vendor').is(":checked");
+    var chk_inv_type = $('#chk_inv_type').is(":checked");
+    var chk_pn = $('#chk_pn').is(":checked");
+    var chk_po = $('#chk_po').is(":checked");
+    var chk_expected_del_date = ($('#chk_expected_del_date').is(":checked"));
+    var sel = $('#orders_status').val();
+    var sel_vendor = $('#sel_vendor').val();    
+    var sel_inv_type = $('#sel_inv_type').val();
+    var txt_pn = $('#txt_pn').val();
+    var txt_po = $('#txt_po').val();
+    var txt_expected_del_date = $('#txt_expected_del_date').val();
+    // alert(chk_status+", " + chk_vendor + ", " + chk_po +", " + chk_expected_del_date +", " + sel + ", " + sel_vendor + ", " +  txt_po + ", " + txt_expected_del_date);
+
+    $.post("{{ url_for('main.view_orders')}}",{status: sel,
+      chk_status: chk_status,
+      chk_vendor: chk_vendor,
+      chk_inv_type: chk_inv_type,
+      chk_pn: chk_pn,
+      chk_po: chk_po,
+      chk_expected_del_date: chk_expected_del_date,
+      sel_vendor: sel_vendor,
+      sel_inv_type: sel_inv_type,
+      txt_pn: txt_pn,
+      txt_po: txt_po,
+      txt_expected_del_date: txt_expected_del_date }, function (data, status){
+      $('#div_orders').html(data);
+    });
+  });
+
+    $('#btn_edit_save').click(function(){
+      $('#editModal').modal("hide");
+      var chk_edit_expected_del_date = $('#chk_edit_expected_del_date').is(":checked");
+      var chk_edit_ship_via = $('#chk_edit_ship_via').is(":checked");
+      var chk_edit_tracking_number = $('#chk_edit_tracking_number').is(":checked");
+      var chk_edit_status = ($('#chk_edit_status').is(":checked"));
+      var chk_edit_priority = ($('#chk_edit_priority').is(":checked"));
+      var txt_edit_expected_del_date = $('#txt_edit_expected_del_date').val();
+      var sel_edit_ship_via = $('#sel_edit_ship_via').val();
+      var txt_edit_tracking_number = $('#txt_edit_tracking_number').val();
+      var sel_edit_status = $('#sel_edit_status').val();
+      var sel_edit_priority = $('#sel_edit_priority').val();
+
+      $(".chk_item").each(function(){
+        if($(this).is(":checked")){
+          var id =$(this).val();
+          $.post("/update_selected_orders/"+id,{ chk_edit_expected_del_date: chk_edit_expected_del_date,
+          chk_edit_ship_via: chk_edit_ship_via,
+          chk_edit_tracking_number: chk_edit_tracking_number,
+          chk_edit_status: chk_edit_status,
+          chk_edit_priority: chk_edit_priority,
+          txt_edit_expected_del_date: txt_edit_expected_del_date,
+          sel_edit_ship_via: sel_edit_ship_via,
+          txt_edit_tracking_number: txt_edit_tracking_number,
+          sel_edit_status: sel_edit_status,
+          sel_edit_priority: sel_edit_priority}, function (data, status){
+            console.log(data);
+          });
+        }
+      });
+      $('#btn_select_status').click();
+    });
+  });
+</script>
+{% endblock %}
