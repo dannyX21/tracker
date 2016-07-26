@@ -28,6 +28,7 @@ def deploy():
     from flask_migrate import upgrade
     from app.models import Role
     # migrate database to the latest revision.
+    migrate()
     upgrade()
 
     # create user roles
