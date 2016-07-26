@@ -27,8 +27,7 @@ def deploy():
     """ Run deployment tasks. """
     from flask_migrate import upgrade
     from app.models import Role
-    # migrate database to the latest revision.
-    migrate()
+    # migrate database to the latest revision.    
     upgrade()
 
     # create user roles
