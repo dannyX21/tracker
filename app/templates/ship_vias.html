@@ -22,7 +22,7 @@
     <tbody>
     {% for ship_via in ship_vias %}
       <tr>
-        <td class='center-align'><a href="{{ url_for('edit_ship_via',id=ship_via.id) }}">{{ ship_via.code }}</a></td>
+        <td class='center-align'><a href="{{ url_for('main.edit_ship_via',id=ship_via.id) }}">{{ ship_via.code }}</a></td>
         <td class='center-align'>{{ ship_via.name }}</td>
         <td>{{ ship_via.tracking_url }}</td>
       </tr>
