@@ -74,7 +74,7 @@ class Ship_via(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(4), unique=True, nullable=False)
     name = db.Column(db.String(32), nullable=False)
-    tracking_url = db.Column(db.String(64), default=None, nullable=True)
+    tracking_url = db.Column(db.String(128), default=None, nullable=True)
     po_lines = db.relationship('PO_line', backref='ship_via', lazy='dynamic')
     default_ship_via = db.relationship('Vendor', backref='default_ship_via', lazy='dynamic')
 
