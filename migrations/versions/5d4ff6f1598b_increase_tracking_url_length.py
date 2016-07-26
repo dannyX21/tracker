@@ -1,13 +1,13 @@
-"""inital migration
+"""increase tracking url length
 
-Revision ID: 21d0d575962a
+Revision ID: 5d4ff6f1598b
 Revises: None
-Create Date: 2016-07-25 15:57:06.066074
+Create Date: 2016-07-26 09:33:05.578751
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '21d0d575962a'
+revision = '5d4ff6f1598b'
 down_revision = None
 
 from alembic import op
@@ -35,7 +35,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('code', sa.String(length=4), nullable=False),
     sa.Column('name', sa.String(length=32), nullable=False),
-    sa.Column('tracking_url', sa.String(length=64), nullable=True),
+    sa.Column('tracking_url', sa.String(length=128), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('code')
     )
