@@ -25,7 +25,7 @@
     <tbody>
     {% for vendor in vendors %}
       <tr>
-        <td class='center-align'><a href="#">{{ vendor.vendor_number }}</a></td>
+        <td class='center-align'>{% if current_user.is_administrator() %}<a href="{{url_for('main.edit_vendor', id=vendor.id)}}">{{ vendor.vendor_number }}</a>{% else %}{{ vendor.vendor_number}}{% endif %}</td>
         <td class='center-align'>{{ vendor.name }}</td>
         <td class='center-align'><a href='mailto:{{vendor.email}}'>{{vendor.contact}}</a></td>
         <td class='center-align'><a href="{{vendor.website}}">{{vendor.website}}</a></td>

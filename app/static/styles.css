@@ -12,10 +12,13 @@
 }
 
 .profile-thumbnail {
+  float:left;
+
     /*position: absolute;*/
 }
 
 .profile-header {
+    padding-left: 5px;
     min-height: 260px;
     margin-left: 280px;
 }
@@ -66,9 +69,12 @@ div.post-author {
     font-weight: bold;
 }
 div.post-thumbnail {
+
+  float:left;
     /*position: absolute;*/
 }
 div.post-content {
+    padding-left: 5px;
     margin-left: 48px;
     min-height: 48px;
 }
@@ -94,4 +100,9 @@ div.pagination {
 
 a, u {
   text-decoration: none !important;
+}
+
+.no-link, .no-link:hover, .no-link:visited, .no-link:active{
+  color:inherit;
+  text-decoration: none;
 }

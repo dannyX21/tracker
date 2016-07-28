@@ -2,7 +2,10 @@
 <table class='table table-striped table-bordered table-hover table-condensed' id='tbl-orders'>
   <thead>
     <tr>
+      {% if current_user.can(Permission.MODIFY) %}
+      {% set can_modify = True %}
       <th><input type="checkbox" value="" id="chk_master"></th>
+      {% endif %}
       <th> </th>
       <th>PO#</th>
       <th>Vendor</th>
@@ -20,13 +23,15 @@
   <tbody>
   {% for order in orders %}
     <tr {% if order.priority %} class="danger" {% endif %}>
+      {% if can_modify %}
       <td><input type="checkbox" value="{{order.id}}" id="chk_{{order.id}}" class="chk_item"></td>
-      <td> {% if order.status ==0 %} <a href="#" data-toggle="tooltip" data-placement="top" title="Ordered"><img src="{{url_for('static', filename='ordered.png')}}"></a>
-        {% elif order.status ==1 %} <a href="#" data-toggle="tooltip" data-placement="top" title="Confirmed"><img src="{{url_for('static', filename='confirmed.png')}}"></a>
-        {% elif order.status ==2 %} <a href="#" data-toggle="tooltip" data-placement="top" title="Shipped"><img src="{{url_for('static', filename='shipped.png')}}"></a>
-        {% elif order.status == 3 %} <a href="#" data-toggle="tooltip" data-placement="top" title="Delivered"><img src="{{url_for('static', filename='delivered.png')}}"></a>
-        {% elif order.status ==4 %} <a href="#" data-toggle="tooltip" data-placement="top" title="Importation"><img src="{{url_for('static', filename='import.png')}}"></a>
-        {% elif order.status ==5 %}<a href="#" data-toggle="tooltip" data-placement="top" title="Complete"><img src="{{url_for('static', filename='complete.png')}}"></a>
+      {% endif %}
+      <td> {% if order.status ==0 %} <a class="status-icon"  href="#" data-toggle="tooltip" data-placement="top" title="Ordered"><img src="{{url_for('static', filename='ordered.png')}}"></a>
+        {% elif order.status ==1 %} <a class="status-icon" href="#" data-toggle="tooltip" data-placement="top" title="Confirmed"><img src="{{url_for('static', filename='confirmed.png')}}"></a>
+        {% elif order.status ==2 %} <a class="status-icon" href="#" data-toggle="tooltip" data-placement="top" title="Shipped"><img src="{{url_for('static', filename='shipped.png')}}"></a>
+        {% elif order.status == 3 %} <a class="status-icon" href="#" data-toggle="tooltip" data-placement="top" title="Delivered"><img src="{{url_for('static', filename='delivered.png')}}"></a>
+        {% elif order.status ==4 %} <a class="status-icon" href="#" data-toggle="tooltip" data-placement="top" title="Importation"><img src="{{url_for('static', filename='import.png')}}"></a>
+        {% elif order.status ==5 %}<a class="status-icon" href="#" data-toggle="tooltip" data-placement="top" title="Complete"><img src="{{url_for('static', filename='complete.png')}}"></a>
         {% endif %}
       </td>
       <td><a href="#" data-toggle="modal" data-target="#itemModal" class="btn-view-order" data-order="{{ order.id }}">{{ order.po_number }} {% if order.posts.count()>0 %}<span class="label label-info label-as-badge">{{order.posts.count()}}</span>{% endif %}</a></td>
@@ -40,9 +45,9 @@
       <td class='center-align'>{% if order.expected_del_date %}{{ order.expected_del_date.strftime('%m/%d/%y')}} {% endif %}</td>
       <td class='center-align'>{{ order.ship_via.code }}</td>
       <td class='center-align'>
-        {% if order.ship_via.tracking_url and '@' in order.ship_via.tracking_url and order.tracking_number|length > 0 %} <a href="{{order.ship_via.tracking_url|replace('@',order.tracking_number) }}" target="_blank"><span title="Track shipment" class="glyphicon glyphicon-globe"></span></a>{% else %}<span title="Tracking information not available." class="glyphicon glyphicon-globe"></span>{% endif %}
-        {% if current_user.is_following(order) %}<a href='#' class='btn-follow unfollow' data-order='{{ order.id }}'><span title="Unfollow this item." class="glyphicon glyphicon-envelope"></span></a> {% else %} <a href='#' class='btn-follow follow' data-order='{{ order.id }}'><span title="Follow this item." class="glyphicon glyphicon-envelope"></span></a>{% endif %}
-        {% if current_user.can(Permission.MODIFY) %}<a href="{{ url_for('main.order',id=order.id) }}"><span title="Edit this item." class="glyphicon glyphicon-edit"></span></a> {% endif %}
+        {% if order.ship_via.tracking_url and '@' in order.ship_via.tracking_url and order.tracking_number|length > 0 %} <a class="status-icon" data-toggle="tooltip" data-placement="top" title="Track shipment" href="{{order.ship_via.tracking_url|replace('@',order.tracking_number) }}" target="_blank"><span class="glyphicon glyphicon-globe"></span></a>{% else %}<a class="status-icon no-link" data-toggle="tooltip" data-placement="top" title="Tracking information not available."><span class="glyphicon glyphicon-globe"></span></a>{% endif %}
+        {% if current_user.is_following(order) %}<a title="Unfollow this item." href='#' class='btn-follow unfollow' data-order='{{ order.id }}'><span class="glyphicon glyphicon-envelope"></span></a> {% else %} <a title="Follow this item." href='#' class='btn-follow follow' data-order='{{ order.id }}'><span class="glyphicon glyphicon-envelope"></span></a>{% endif %}
+        {% if current_user.can(Permission.MODIFY) %}<a class="status-icon" data-toggle="tooltip" data-placement="top" title="Edit this item." href="{{ url_for('main.order',id=order.id) }}"><span class="glyphicon glyphicon-edit"></span></a> {% endif %}
       </td>
     </tr>
     {% endfor %}

@@ -11,7 +11,7 @@ class PO_lineForm(Form):
     ship_via = SelectField('Ship via', coerce=int, validators=[Optional()])
     tracking_number = StringField('Tracking Number', validators=[Optional()])
     status = SelectField('Status', coerce=int)
-    priority = BooleanField('High Priority')    
+    priority = BooleanField('High Priority')
     submit = SubmitField('Submit')
 
     def __init__(self, po_line, *args, **kwargs):
@@ -41,6 +41,29 @@ class New_VendorForm(Form):
     def validate_name(self, field):
         if Vendor.query.filter_by(name=field.data).first():
             raise ValidationError('Vendor {} is already registered.'.format(field.data))
+
+class Edit_VendorForm(Form):
+    vendor_number = IntegerField('Vendor#', validators=[Required(),NumberRange(min=10000)])
+    name = StringField('Name', validators=[Required()])
+    contact = StringField('Contact name', validators=[Optional()])
+    email = StringField('Contact email', validators=[Optional(), Email()])
+    website = StringField('Website', validators=[Optional(), URL()])
+    phone =  StringField('Phone', validators=[Optional(),Length(10)])
+    default_ship_via_id = SelectField('Default Ship via', coerce=int)
+    submit = SubmitField('Submit')
+
+    def __init__(self, vendor, *args, **kwargs):
+        super(Edit_VendorForm, self).__init__(*args, **kwargs)
+        self.default_ship_via_id.choices = [(ship_via.id, ship_via.name) for ship_via in Ship_via.query.order_by(Ship_via.name).all()]
+        self.vendor = vendor
+
+    def validate_vendor_number(self, field):
+        if field.data != self.vendor.vendor_number and Vendor.query.filter_by(vendor_number=field.data).first():
+            raise ValidationError('Vendor# {} is already registered.'.format(field.data))
+
+    def validate_name(self, field):
+        if field.data != self.vendor.name and Vendor.query.filter_by(name=field.data).first():
+            raise ValidationError("Vendor '{}' is already registered.".format(field.data))
 
 class FileUpload_Form(Form):
     fileUpload = FileField('Select file: ')

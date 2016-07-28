@@ -12,7 +12,9 @@
     <div class="container">
       <div class="btn-group-lg">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#filterModal"><span class="glyphicon glyphicon-filter"></span> Filter</button>
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal"><span class="glyphicon glyphicon-edit"></span> Edit</button>
+        {% if current_user.can(Permission.MODIFY) %}
+          <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal"><span class="glyphicon glyphicon-edit"></span> Edit</button>
+        {% endif %}
       </div>
       <div id="filterModal" class="modal fade" role="dialog">
         <div class="modal-dialog modal-sm">
@@ -154,7 +156,10 @@
 <script>
 
 $(document).ready(function(){
-  $('[data-toggle="tooltip"]').tooltip();
+
+  $('body').tooltip({
+    selector: '.status-icon'});
+  // $('[data-toggle="tooltip"]').tooltip();
 
   $(document).on("change","#chk_master",function(){
     if($(this).is(':checked')){
@@ -216,7 +221,7 @@ $(document).ready(function(){
     var chk_po = $('#chk_po').is(":checked");
     var chk_expected_del_date = ($('#chk_expected_del_date').is(":checked"));
     var sel = $('#orders_status').val();
-    var sel_vendor = $('#sel_vendor').val();    
+    var sel_vendor = $('#sel_vendor').val();
     var sel_inv_type = $('#sel_inv_type').val();
     var txt_pn = $('#txt_pn').val();
     var txt_po = $('#txt_po').val();

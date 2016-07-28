@@ -1,13 +1,13 @@
 from . import main
-from .forms import PO_lineForm, NewShipVia_Form, New_VendorForm, FileUpload_Form, EditProfileForm, EditProfileAdminForm
+from .forms import PO_lineForm, NewShipVia_Form, New_VendorForm, Edit_VendorForm, FileUpload_Form, EditProfileForm, EditProfileAdminForm
 from .. import db
-from ..models import PO_line, Vendor, Ship_via, Packing_slip, Coo, User, Role, Post
+from ..models import PO_line, Vendor, Ship_via, Packing_slip, Coo, User, Role, Post, Permission
 from ..email import send_email
 from flask import Flask, render_template, request, session, redirect, url_for, flash, current_app, abort
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
-from ..decorators import admin_required
+from ..decorators import admin_required, permission_required
 import os
 
 ALLOWED_EXTENSIONS = set(['txt'])
@@ -18,6 +18,7 @@ def index():
 
 
 @main.route('/orders')
+@permission_required(Permission.VIEW)
 @login_required
 def orders():
     # orders = PO_line.query.filter(PO_line.status < 5).order_by(PO_line.expected_del_date.asc()).all()
@@ -31,6 +32,7 @@ def orders():
 
 @main.route('/view_orders/', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.VIEW)
 def view_orders():
     orders = get_orders_from_session()
     pagination = orders.order_by(PO_line.expected_del_date.asc()).paginate(session.get('page',1),per_page=current_app.config['ITEMS_PER_PAGE'],error_out=False)
@@ -39,6 +41,7 @@ def view_orders():
 
 @main.route('/update_selected_orders/<int:id>', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.MODIFY)
 def update_selected_orders(id):
     po_line = PO_line.query.get_or_404(id)
     chk_edit_expected_del_date = request.form.get('chk_edit_expected_del_date')=='true'
@@ -74,18 +77,21 @@ def update_selected_orders(id):
 
 @main.route('/view_shipvias/')
 @login_required
+@permission_required(Permission.VIEW)
 def view_shipvias():
     ship_vias = Ship_via.query.all()
     return render_template('ship_vias.html', ship_vias=ship_vias)
 
 @main.route('/view_vendors/')
 @login_required
+@permission_required(Permission.VIEW)
 def view_vendors():
     vendors = Vendor.query.all()
     return render_template('vendors.html', vendors=vendors)
 
 @main.route('/edit_ship_via/<int:id>', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.MODIFY)
 def edit_ship_via(id):
     ship_via = Ship_via.query.get_or_404(id)
     form = NewShipVia_Form()
@@ -109,8 +115,38 @@ def edit_ship_via(id):
         form.tracking_url.data = ship_via.tracking_url
         return render_template('edit_ship_via.html',form=form)
 
+@main.route('/edit_vendor/<int:id>', methods=['GET','POST'])
+@login_required
+@permission_required(Permission.MODIFY)
+def edit_vendor(id):
+    vendor = Vendor.query.get_or_404(id)
+    form = Edit_VendorForm(vendor=vendor)
+    if form.validate_on_submit():
+        vendor.vendor_number = form.vendor_number.data
+        vendor.name = form.name.data
+        vendor.contact = form.contact.data
+        vendor.email = form.email.data
+        vendor.website = form.website.data
+        vendor.phone = form.phone.data
+        vendor.default_ship_via_id = form.default_ship_via_id.data
+        db.session.add(vendor)
+        db.session.commit()
+        flash("Vendor '{}' has been updated.".format(vendor.name))
+        vendors = Vendor.query.all()
+        return render_template('vendors.html', vendors=vendors)
+    else:
+        form.vendor_number.data = vendor.vendor_number
+        form.name.data = vendor.name
+        form.contact.data = vendor.contact
+        form.email.data = vendor.email
+        form.website.data = vendor.website
+        form.phone.data = vendor.phone
+        form.default_ship_via_id.data = vendor.default_ship_via_id
+        return render_template('edit_vendor.html', form=form)
+
 @main.route('/new_shipvia/', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.MODIFY)
 def new_shipvia():
     form = NewShipVia_Form()
     if form.validate_on_submit():
@@ -130,6 +166,7 @@ def new_shipvia():
 
 @main.route('/new_vendor/', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.MODIFY)
 def new_vendor():
     form = New_VendorForm()
     if form.validate_on_submit():
@@ -144,6 +181,7 @@ def new_vendor():
 
 @main.route('/order/<int:id>', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.MODIFY)
 def order(id):
     po_line = PO_line.query.get_or_404(id)
     form = PO_lineForm(po_line=po_line)
@@ -238,6 +276,7 @@ def edit_profile_admin(id):
 
 @main.route('/subscribe/<int:id>', methods=['POST'])
 @login_required
+@permission_required(Permission.SUBSCRIBE)
 def subscribe(id):
     po_line = PO_line.query.get_or_404(id)
     current_user.follow(po_line)
@@ -245,6 +284,7 @@ def subscribe(id):
 
 @main.route('/unsubscribe/<int:id>', methods=['GET','POST'])
 @login_required
+@permission_required(Permission.SUBSCRIBE)
 def unsubscribe(id):
     po_line = PO_line.query.get_or_404(id)
     current_user.unfollow(po_line)
@@ -252,6 +292,7 @@ def unsubscribe(id):
 
 @main.route('/order_details/<int:id>', methods=['POST'])
 @login_required
+@permission_required(Permission.VIEW)
 def order_details(id):
     po_line = PO_line.query.get_or_404(id)
     posts = Post.query.filter_by(po_line_id=id).order_by(Post.timestamp.desc()).all()
@@ -259,6 +300,7 @@ def order_details(id):
 
 @main.route('/post_comment/<int:id>', methods=['POST'])
 @login_required
+@permission_required(Permission.COMMENT)
 def post_comment(id):
     po_line = PO_line.query.get_or_404(id)
     comment = request.form.get('comment',"",type=str)
@@ -271,6 +313,7 @@ def post_comment(id):
 
 @main.route('/import/', methods=['GET','POST'])
 @login_required
+@admin_required
 def import_file():
     form =FileUpload_Form()
     if form.validate_on_submit():
