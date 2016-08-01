@@ -3,7 +3,7 @@ from .forms import PO_lineForm, NewShipVia_Form, New_VendorForm, Edit_VendorForm
 from .. import db
 from ..models import PO_line, Vendor, Ship_via, Packing_slip, Coo, User, Role, Post, Permission
 from ..email import send_email
-from flask import Flask, render_template, request, session, redirect, url_for, flash, current_app, abort
+from flask import Flask, render_template, request, session, redirect, url_for, flash, current_app, abort, send_from_directory
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
@@ -16,6 +16,9 @@ ALLOWED_EXTENSIONS = set(['txt'])
 def index():
     return render_template('index.html')
 
+@main.route('/favicon.png')
+def favicon():
+    return send_from_directory(os.path.join(main.root_path, 'static'), 'favicon.png')
 
 @main.route('/orders')
 @permission_required(Permission.VIEW)
