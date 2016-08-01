@@ -174,6 +174,60 @@ $(document).ready(function(){
     }
   });
 
+  $('#chk_status').change(function(){
+    if($(this).is(':checked')){
+      $("#orders_status").focus();
+    }
+    else{
+      $("#orders_status > option:selected").prop("selected", false);
+    }
+  });
+
+  $('#chk_vendor').change(function(){
+    if($(this).is(':checked')){
+      $("#sel_vendor").focus();
+    }
+    else{
+      $("#sel_vendor > option:selected").prop("selected", false);
+    }
+  });
+
+  $('#chk_inv_type').change(function(){
+    if($(this).is(':checked')){
+      $("#sel_inv_type").focus();
+    }
+    else{
+      $("#sel_inv_type > option:selected").prop("selected", false);
+    }
+  });
+
+  $('#chk_pn').change(function(){
+    if($(this).is(':checked')){
+      $("#txt_pn").focus();
+    }
+    else{
+      $("#txt_pn").val("");
+    }
+  });
+
+  $('#chk_po').change(function(){
+    if($(this).is(':checked')){
+      $("#txt_po").focus();
+    }
+    else{
+      $("#txt_po").val("");
+    }
+  });
+
+  $('#chk_expected_del_date').change(function(){
+    if($(this).is(':checked')){
+      $("#txt_expected_del_date").focus();
+    }
+    else{
+      $("#txt_expected_del_date").val("");
+    }
+  });
+
   $(document).on("click",".btn-view-order",function(){
     var order_id = $(this).data('order');
     console.log(order_id);
