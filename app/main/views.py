@@ -25,7 +25,7 @@ def orders():
     vendors = Vendor.query.order_by(Vendor.name.asc()).all()
     ship_vias = Ship_via.query.order_by(Ship_via.name.asc()).all()
     orders = get_orders_from_session()
-    pagination = orders.order_by(PO_line.expected_del_date.asc()).paginate(session.get('page',1),per_page=current_app.config['ITEMS_PER_PAGE'],error_out=False)
+    pagination = orders.order_by(PO_line.expected_del_date.asc(), PO_line.po_number.asc()).paginate(session.get('page',1),per_page=current_app.config['ITEMS_PER_PAGE'],error_out=False)
     orders = pagination.items
     return render_template('orders.html', orders=orders, vendors=vendors, ship_vias=ship_vias, pagination=pagination)
 
@@ -35,7 +35,7 @@ def orders():
 @permission_required(Permission.VIEW)
 def view_orders():
     orders = get_orders_from_session()
-    pagination = orders.order_by(PO_line.expected_del_date.asc()).paginate(session.get('page',1),per_page=current_app.config['ITEMS_PER_PAGE'],error_out=False)
+    pagination = orders.order_by(PO_line.expected_del_date.asc(), PO_line.po_number.asc()).paginate(session.get('page',1),per_page=current_app.config['ITEMS_PER_PAGE'],error_out=False)
     orders = pagination.items
     return render_template('_view_orders.html', orders=orders, pagination=pagination)
 
@@ -159,7 +159,7 @@ def new_shipvia():
             return redirect(url_for('.orders'))
         else:
             flash('Ship via: {} was already registered.'.format(form.code.data))
-            return redirect(url_for('.orders'))
+            return redirect(url_for('.view_shipvias'))
     else:
         return render_template('new_shipvia.html',form=form)
 
