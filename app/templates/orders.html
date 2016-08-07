@@ -228,6 +228,51 @@ $(document).ready(function(){
     }
   });
 
+  $('#chk_edit_status').change(function(){
+    if($(this).is(':checked')){
+      $("#sel_edit_status").focus();
+    }
+    else{
+      $("#sel_edit_status > option:selected").prop("selected", false);
+    }
+  });
+
+  $('#chk_edit_ship_via').change(function(){
+    if($(this).is(':checked')){
+      $("#sel_edit_ship_via").focus();
+    }
+    else{
+      $("#sel_edit_ship_via > option:selected").prop("selected", false);
+    }
+  });
+
+  $('#chk_edit_priority').change(function(){
+    if($(this).is(':checked')){
+      $("#sel_edit_priority").focus();
+    }
+    else{
+      $("#sel_edit_priority > option:selected").prop("selected", false);
+    }
+  });
+
+  $('#chk_edit_expected_del_date').change(function(){
+    if($(this).is(':checked')){
+      $("#txt_edit_expected_del_date").focus();
+    }
+    else{
+      $("#txt_edit_expected_del_date").val("");
+    }
+  });
+
+  $('#chk_edit_tracking_number').change(function(){
+    if($(this).is(':checked')){
+      $("#txt_edit_tracking_number").focus();
+    }
+    else{
+      $("#txt_edit_tracking_number").val("");
+    }
+  });
+
   $(document).on("click",".btn-view-order",function(){
     var order_id = $(this).data('order');
     console.log(order_id);
